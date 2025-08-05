@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify SQL Capstone</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Spotify SQL Capstone</h1>
+      <p>Unlocking music insights through structured data and SQL mastery.</p>
+    </header>
+
+    <!-- Navigation Menu -->
+    <nav>
+      <a href="#overview">Project Overview</a>
+      <a href="#queries">Queries & Results</a>
+    </nav>
+
+    <!-- Project Overview Section -->
+    <section id="overview">
+      <h2>Spotify SQL Analyst – A Capstone Project</h2>
+
+      <!-- Project Introduction Paragraph -->
+      <p>
+        <strong>Introduction</strong><br />
+        This capstone project demonstrates my ability to use SQL to clean,
+        analyze, and extract insights from real-world data. For this task, I
+        analyzed Spotify playback data to uncover trends and user behaviors that
+        could be used to improve algorithmic recommendations. The dataset
+        included information such as track play durations, artist and album
+        names, playback reason types, shuffle usage, and whether tracks were
+        skipped.
+      </p>
+
+      <!-- Tools and Resources Used -->
+      <p><strong>Setup and Configuration</strong></p>
+      <ul>
+        <li>
+          <strong>Database Platform:</strong>
+          <a href="https://mariadb.org/" target="_blank">MariaDB</a>
+        </li>
+        <li>
+          <strong>Database GUI:</strong>
+          <a href="https://www.phpmyadmin.net/" target="_blank">phpMyAdmin</a>
+        </li>
+        <li>
+          <strong>Dataset:</strong>
+          <a
+            href="https://www.kaggle.com/datasets/sgoutami/spotify-streaming-history/data"
+            target="_blank"
+          >
+            Spotify streaming history (spotify_history.csv)
+          </a>
+        </li>
+      </ul>
+
+      <!-- Technical Setup and Steps -->
+      <p><strong>Steps Taken:</strong></p>
+      <ul>
+        <li>
+          <strong>XAMPP Installation:</strong> I installed XAMPP to manage
+          Apache and MySQL/MariaDB locally.
+        </li>
+        <li>
+          <strong>MariaDB Setup:</strong> I configured MariaDB and ensured it
+          was running without port conflicts.
+        </li>
+        <li>
+          <strong>Database Creation:</strong> I created a new database called
+          <code>spotify_analysis</code> using phpMyAdmin.
+        </li>
+        <li>
+          <strong>Table Definition:</strong> I manually created the
+          <code>spotify_history</code> table with the correct data types
+          matching the CSV file.
+        </li>
+        <li>
+          <strong>CSV Import:</strong> I imported the dataset via phpMyAdmin,
+          ensuring that fields like <code>skipped</code> and
+          <code>shuffle</code> stored values as TRUE or FALSE.
+        </li>
+        <li>
+          <strong>Data Cleaning:</strong> I removed carriage return characters
+          (<code>\r</code>) from some fields to allow clean comparisons using
+          <code>WHERE skipped = 'TRUE'</code>.
+        </li>
+      </ul>
+
+      <!-- Summary of SQL Analysis Performed -->
+      <p>
+        <strong>Query Execution</strong><br />
+        After setup, I ran a series of SQL queries directly in phpMyAdmin to
+        complete the following tasks:
+      </p>
+
+      <!-- List of SQL Insights from Project -->
+      <ul>
+        <li>
+          <strong>Skipped Songs Analysis:</strong> Identified tracks that were
+          skipped within the first 10 seconds of playback. Songs like
+          <em>"Intro"</em> and <em>"Sleepy Song"</em> had the highest
+          short-duration skip counts, indicating possible listener disinterest
+          or filler content. This data helps isolate songs that may cause
+          disengagement early in listening.
+        </li>
+
+        <li>
+          <strong>User Selection Analysis:</strong> Revealed that the vast
+          majority of tracks were manually selected by the user (via clicks),
+          with songs like <em>"Ode To The Mets"</em> and
+          <em>"Crucify Your Mind"</em> being selected the most. Only one
+          autoplayed song — <em>"Say It, Just Say It"</em> — was found, and it
+          had a 0% skip rate. This suggests that the user relies heavily on
+          manual track selection, limiting insights into autoplay behavior.
+        </li>
+
+        <li>
+          <strong>Playlist Balancing Insights:</strong> Found several artists
+          who appeared more than twice, such as <em>"The Beatles"</em> and
+          <em>"The Killers"</em>, highlighting potential overplay issues.
+          Additionally, the longest-played tracks with shuffle disabled included
+          <em>"Tubular Bells - Pt. I"</em> and
+          <em>"Tubular Bells - Pt. II"</em>, suggesting strong user intent in
+          focused listening sessions.
+        </li>
+
+        <li>
+          <strong>Rage Skip Detection:</strong> Detected a session with more
+          than 5 skips in under one minute, indicating a poor listening
+          experience. This session occurred on the <em>Android</em> platform and
+          involved <em>"Megalithic Symphony Deluxe"</em>, suggesting a potential
+          mismatch between autoplay recommendations and user preference.
+        </li>
+
+        <li>
+          <strong>One-Hit Wonders:</strong> Identified artists whose plays were
+          overwhelmingly concentrated on a single track (90%+), such as
+          <em>"Hot Chocolate"</em> with <em>"You Sexy Thing"</em>. These
+          findings confirm that some artists’ popularity is tied to a single
+          successful release.
+        </li>
+      </ul>
+    </section>
+
+    <section id="queries">
+      <h2>Queries & Results</h2>
+      <!-- 1. Skipped Songs Under 10 Seconds — Already added above -->
+      <div class="query-block">
+        <div class="query-title" onclick="toggleQuery(this)">
+          Skipped Songs Under 10 Seconds
+        </div>
+        <div class="query-content">
+          <pre><code class="sql">SELECT track_name, COUNT(*) AS skip_count
+FROM spotify_history
+WHERE skipped = 'TRUE' AND ms_played < 10000
+GROUP BY track_name
+ORDER BY skip_count DESC;
+    </code></pre>
+          <div class="result-loading">Running query...</div>
+          <table class="dataframe result-table">
+            <thead>
+              <tr style="text-align: right">
+                <th>track_name</th>
+                <th>skip_count</th>
+                <th>total_plays</th>
+                <th>skip_ratio_percent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Photograph</td>
+                <td>19</td>
+                <td>82</td>
+                <td>23.17</td>
+              </tr>
+              <tr>
+                <td>Superheroes</td>
+                <td>19</td>
+                <td>55</td>
+                <td>34.55</td>
+              </tr>
+              <tr>
+                <td>Switzerland</td>
+                <td>15</td>
+                <td>49</td>
+                <td>30.61</td>
+              </tr>
+              <tr>
+                <td>All of Me</td>
+                <td>13</td>
+                <td>17</td>
+                <td>76.47</td>
+              </tr>
+              <tr>
+                <td>What Do You Mean?</td>
+                <td>12</td>
+                <td>61</td>
+                <td>19.67</td>
+              </tr>
+              <tr>
+                <td>Just Keep Breathing</td>
+                <td>12</td>
+                <td>17</td>
+                <td>70.59</td>
+              </tr>
+              <tr>
+                <td>Paraíso</td>
+                <td>11</td>
+                <td>34</td>
+                <td>32.35</td>
+              </tr>
+              <tr>
+                <td>La Buena y la Mala</td>
+                <td>11</td>
+                <td>18</td>
+                <td>61.11</td>
+              </tr>
+              <tr>
+                <td>Alone Together</td>
+                <td>11</td>
+                <td>49</td>
+                <td>22.45</td>
+              </tr>
+              <tr>
+                <td>Un Zombie A La Intemperie</td>
+                <td>11</td>
+                <td>54</td>
+                <td>20.37</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2. Most Manually Selected Tracks -->
+      <div class="query-block">
+        <div class="query-title" onclick="toggleQuery(this)">
+          Most Manually Selected Tracks
+        </div>
+        <div class="query-content">
+          <pre><code class="sql">SELECT track_name, COUNT(*) AS manual_count
+FROM spotify_history
+WHERE LOWER(reason_start) = 'clickrow'
+GROUP BY track_name
+ORDER BY manual_count DESC
+    </code></pre>
+          <div class="result-loading">Running query...</div>
+          <table class="dataframe result-table">
+            <thead>
+              <tr>
+                <th>Track Name</th>
+                <th>Play Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ode To The Mets</td>
+                <td>86</td>
+              </tr>
+              <tr>
+                <td>Married with Children - 2014 Remaster</td>
+                <td>79</td>
+              </tr>
+              <tr>
+                <td>Crucify Your Mind</td>
+                <td>67</td>
+              </tr>
+              <tr>
+                <td>19 Dias y 500 Noches - En Directo</td>
+                <td>60</td>
+              </tr>
+              <tr>
+                <td>Reminder</td>
+                <td>47</td>
+              </tr>
+              <tr>
+                <td>Dying Breed</td>
+                <td>47</td>
+              </tr>
+              <tr>
+                <td>In the Blood</td>
+                <td>37</td>
+              </tr>
+              <tr>
+                <td>Caution</td>
+                <td>37</td>
+              </tr>
+              <tr>
+                <td>Me and Paul</td>
+                <td>37</td>
+              </tr>
+              <tr>
+                <td>Cold Cold Cold</td>
+                <td>36</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 3. Highest Skip Rates from Autoplay -->
+      <div class="query-block">
+        <div class="query-title" onclick="toggleQuery(this)">
+          Autoplayed Songs With Highest Skip Rate
+        </div>
+        <div class="query-content">
+          <pre><code class="sql">SELECT track_name, COUNT(*) AS total_plays,
+  SUM(CASE WHEN skipped = 'TRUE' THEN 1 ELSE 0 END) AS skips,
+  ROUND(SUM(CASE WHEN skipped = 'TRUE' THEN 1 ELSE 0 END)/COUNT(*)*100, 2) AS skip_rate_percent
+FROM spotify_history
+WHERE LOWER(reason_start) = 'autoplay'
+GROUP BY track_name
+ORDER BY skip_rate_percent DESC
+    </code></pre>
+          <div class="result-loading">Running query...</div>
+          <table class="dataframe result-table">
+            <thead>
+              <tr style="text-align: right">
+                <th>track_name</th>
+                <th>total_plays</th>
+                <th>skips</th>
+                <th>skip_rate_percent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Say It, Just Say It</td>
+                <td>1</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4. Overplayed Artists -->
+      <div class="query-block">
+        <div class="query-title" onclick="toggleQuery(this)">
+          Artists Played More Than Twice
+        </div>
+        <div class="query-content">
+          <pre><code class="sql">SELECT artist_name, COUNT(*) AS play_count
+FROM spotify_history
+GROUP BY artist_name
+HAVING play_count > 2
+ORDER BY play_count DESC;
+    </code></pre>
+          <div class="result-loading">Running query...</div>
+          <table class="dataframe result-table">
+            <thead>
+              <tr style="text-align: right">
+                <th>artist_name</th>
+                <th>play_count</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>The Beatles</td>
+                <td>13621</td>
+              </tr>
+              <tr>
+                <td>The Killers</td>
+                <td>6878</td>
+              </tr>
+              <tr>
+                <td>John Mayer</td>
+                <td>4855</td>
+              </tr>
+              <tr>
+                <td>Bob Dylan</td>
+                <td>3814</td>
+              </tr>
+              <tr>
+                <td>Paul McCartney</td>
+                <td>2697</td>
+              </tr>
+              <tr>
+                <td>Led Zeppelin</td>
+                <td>2482</td>
+              </tr>
+              <tr>
+                <td>Johnny Cash</td>
+                <td>2478</td>
+              </tr>
+              <tr>
+                <td>The Rolling Stones</td>
+                <td>2390</td>
+              </tr>
+              <tr>
+                <td>Radiohead</td>
+                <td>2305</td>
+              </tr>
+              <tr>
+                <td>The Black Keys</td>
+                <td>2231</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 5. Longest Played Tracks with Shuffle Disabled -->
+      <div class="query-block">
+        <div class="query-title" onclick="toggleQuery(this)">
+          Longest Played (Shuffle Disabled)
+        </div>
+        <div class="query-content">
+          <pre><code class="sql">SELECT track_name, MAX(ms_played) AS longest_play
+FROM spotify_history
+WHERE shuffle = 'FALSE'
+GROUP BY track_name
+ORDER BY longest_play DESC
+    </code></pre>
+          <div class="result-loading">Running query...</div>
+          <table class="dataframe result-table">
+            <thead>
+              <tr style="text-align: right">
+                <th>track_name</th>
+                <th>longest_play</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tubular Bells - Pt. I</td>
+                <td>1561125</td>
+              </tr>
+              <tr>
+                <td>Tubular Bells - Pt. II</td>
+                <td>1397146</td>
+              </tr>
+              <tr>
+                <td>Dogs</td>
+                <td>1025280</td>
+              </tr>
+              <tr>
+                <td>
+                  The Return of the King (feat. Sir James Galway, Viggo
+                  Mortensen and Renee Fleming)
+                </td>
+                <td>1006430</td>
+              </tr>
+              <tr>
+                <td>
+                  The Long One - Comprising of ‘You Never Give Me Your Money’,
+                  ’Sun King’/’Mean Mr Mustard’, ‘Her Majesty’, ‘Polythene
+                  Pam’/’She Came In Through The Bathroom Window’, ’Golden
+                  Slumbers’/ ’Carry That Weight’, ’The End’
+                </td>
+                <td>970466</td>
+              </tr>
+              <tr>
+                <td>Terrapin Station</td>
+                <td>969852</td>
+              </tr>
+              <tr>
+                <td>Voodoo Chile</td>
+                <td>899933</td>
+              </tr>
+              <tr>
+                <td>Shine On You Crazy Diamond (Pts. 1-5)</td>
+                <td>811078</td>
+              </tr>
+              <tr>
+                <td>Helter Skelter - First Version / Take 2</td>
+                <td>773504</td>
+              </tr>
+              <tr>
+                <td>Má vlast (My Country): No. 2, Vltava [Moldau]</td>
+                <td>768064</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 6. Rage Skip Detection -->
+      <div class="query-block">
+        <div class="query-title" onclick="toggleQuery(this)">
+          Sessions With 5+ Skips in Under 1 Minute
+        </div>
+        <div class="query-content">
+          <pre><code class="sql">SELECT ts, platform, artist_name, COUNT(*) AS skip_count
+FROM spotify_history
+WHERE skipped = 'TRUE'
+GROUP BY ts, platform, artist_name
+HAVING skip_count >= 5
+ORDER BY skip_count DESC
+    </code></pre>
+          <div class="result-loading">Running query...</div>
+          <table class="dataframe result-table">
+            <thead>
+              <tr style="text-align: right">
+                <th>minute</th>
+                <th>platform</th>
+                <th>artist_name</th>
+                <th>album_name</th>
+                <th>skip_count</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2015-08-13 21:04:00</td>
+                <td>android</td>
+                <td>AWOLNATION</td>
+                <td>Megalithic Symphony Deluxe</td>
+                <td>19</td>
+              </tr>
+              <tr>
+                <td>2015-10-02 23:44:00</td>
+                <td>android</td>
+                <td>The Script</td>
+                <td>No Sound Without Silence</td>
+                <td>9</td>
+              </tr>
+              <tr>
+                <td>2015-10-16 23:50:00</td>
+                <td>android</td>
+                <td>The Rolling Stones</td>
+                <td>Sticky Fingers</td>
+                <td>9</td>
+              </tr>
+              <tr>
+                <td>2022-10-31 15:10:00</td>
+                <td>android</td>
+                <td>Juanes</td>
+                <td>Origen</td>
+                <td>8</td>
+              </tr>
+              <tr>
+                <td>2024-11-01 20:45:00</td>
+                <td>android</td>
+                <td>Kanye West</td>
+                <td>The College Dropout</td>
+                <td>7</td>
+              </tr>
+              <tr>
+                <td>2016-06-02 23:37:00</td>
+                <td>iOS</td>
+                <td>The Temper Trap</td>
+                <td>Conditions</td>
+                <td>7</td>
+              </tr>
+              <tr>
+                <td>2015-09-04 23:33:00</td>
+                <td>android</td>
+                <td>Cody Simpson</td>
+                <td>Free</td>
+                <td>7</td>
+              </tr>
+              <tr>
+                <td>2015-10-13 05:04:00</td>
+                <td>android</td>
+                <td>Will Champlin</td>
+                <td>Tiny Dancer</td>
+                <td>7</td>
+              </tr>
+              <tr>
+                <td>2024-10-25 17:30:00</td>
+                <td>android</td>
+                <td>Beastie Boys</td>
+                <td>Paul's Boutique</td>
+                <td>6</td>
+              </tr>
+              <tr>
+                <td>2024-10-24 22:26:00</td>
+                <td>android</td>
+                <td>50 Cent</td>
+                <td>Get Rich Or Die Tryin'</td>
+                <td>6</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 7. One-Hit Wonders (90%+ from One Track) -->
+      <div class="query-block">
+        <div class="query-title" onclick="toggleQuery(this)">
+          Artists With 90%+ Plays from One Track
+        </div>
+        <div class="query-content">
+          <pre><code class="sql">SELECT artist_name, track_name, COUNT(*) AS play_count
+FROM spotify_history
+GROUP BY artist_name, track_name
+HAVING play_count > (
+  SELECT COUNT(*) * 0.9
+  FROM spotify_history sh2
+  WHERE sh2.artist_name = spotify_history.artist_name
+)
+ORDER BY play_count DESC
+    </code></pre>
+          <div class="result-loading">Running query...</div>
+          <table class="dataframe result-table">
+            <thead>
+              <tr style="text-align: right">
+                <th>artist_name</th>
+                <th>track_name</th>
+                <th>track_play_count</th>
+                <th>total_artist_plays</th>
+                <th>percentage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Pietro Mascagni</td>
+                <td>Cavalleria rusticana: Intermezzo</td>
+                <td>128</td>
+                <td>131</td>
+                <td>0.977099</td>
+              </tr>
+              <tr>
+                <td>Hot Chocolate</td>
+                <td>You Sexy Thing</td>
+                <td>121</td>
+                <td>121</td>
+                <td>1.000000</td>
+              </tr>
+              <tr>
+                <td>Stealers Wheel</td>
+                <td>Stuck In The Middle With You</td>
+                <td>104</td>
+                <td>104</td>
+                <td>1.000000</td>
+              </tr>
+              <tr>
+                <td>Buchanan Brothers</td>
+                <td>Son of a Lovin' Man</td>
+                <td>95</td>
+                <td>95</td>
+                <td>1.000000</td>
+              </tr>
+              <tr>
+                <td>Dusty Springfield</td>
+                <td>Son Of A Preacher Man</td>
+                <td>91</td>
+                <td>91</td>
+                <td>1.000000</td>
+              </tr>
+              <tr>
+                <td>Theo Lawrence and The Hearts</td>
+                <td>Not in Nottingham</td>
+                <td>84</td>
+                <td>84</td>
+                <td>1.000000</td>
+              </tr>
+              <tr>
+                <td>Eduardo di Capua</td>
+                <td>'O sole mio (Arr. Chiaramello)</td>
+                <td>80</td>
+                <td>87</td>
+                <td>0.919540</td>
+              </tr>
+              <tr>
+                <td>Pulp</td>
+                <td>Common People - Full Length Version</td>
+                <td>79</td>
+                <td>87</td>
+                <td>0.908046</td>
+              </tr>
+              <tr>
+                <td>Buffalo Springfield</td>
+                <td>For What It's Worth</td>
+                <td>78</td>
+                <td>78</td>
+                <td>1.000000</td>
+              </tr>
+              <tr>
+                <td>Blue Swede</td>
+                <td>Hooked On A Feeling</td>
+                <td>77</td>
+                <td>77</td>
+                <td>1.000000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Informational note about table output limits -->
+    <section style="text-align: center; padding: 2rem 1rem; color: #bbb">
+      <p>
+        <em>
+          Note: Output tables are limited to 10 rows for readability on this
+          webpage.
+        </em>
+      </p>
+    </section>
+
+    <!-- Page footer with project credits and external course link -->
+    <footer>
+      <p>2025 Liam Birch | Spotify SQL Capstone Project</p>
+      <p>
+        All data and analysis conducted for educational purposes via the
+        <a
+          href="https://www.hyperiondev.com/"
+          target="_blank"
+          style="text-decoration: none"
+        >
+          HyperionDev course
+        </a>
+      </p>
+    </footer>
+
+    <script>
+      // Initialize syntax highlighting for all <code> blocks using highlight.js
+      hljs.highlightAll();
+
+      // Function to toggle visibility of a query block's content
+      function toggleQuery(el) {
+        const content = el.nextElementSibling; // Get the next element (query-content div)
+        const visible = content.style.display === "block"; // Check if it's already visible
+
+        // Hide all other query blocks before showing the selected one
+        document
+          .querySelectorAll(".query-content")
+          .forEach((q) => (q.style.display = "none"));
+
+        // Toggle the visibility of the selected query content
+        content.style.display = visible ? "none" : "block";
+      }
+
+      // Once the DOM is fully loaded, attach "Run" buttons to each code block
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("pre code").forEach((codeBlock) => {
+          const runBtn = document.createElement("button");
+          runBtn.textContent = "Run";
+          runBtn.className = "run-btn";
+
+          // Define what happens when the Run button is clicked
+          runBtn.onclick = () => {
+            const loadingText = codeBlock.parentElement.nextElementSibling;
+            const resultTable = loadingText.nextElementSibling;
+
+            // Show loading message, hide the table initially
+            loadingText.style.display = "block";
+            resultTable.style.display = "none";
+
+            // Simulate a query "running" for 1 second before showing results
+            setTimeout(() => {
+              loadingText.style.display = "none";
+              resultTable.style.display = "table";
+              resultTable.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }, 1000);
+          };
+
+          // Attach the Run button to the code block container
+          codeBlock.parentElement.style.position = "relative";
+          codeBlock.parentElement.appendChild(runBtn);
+        });
+      });
+    </script>
+  </body>
+</html>
